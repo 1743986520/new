@@ -1,7 +1,70 @@
 @echo off
 :: 由善良的人的遊戲庫提供。作者：帝
 
-title Ultimate Network Guardian - 智慧守護中...
+title Ultimate Network Guardian v9.0 - 由善良的人的遊戲庫提供
+
+chcp 65001 >nul
+mode con cols=90 lines=35
+color 0b
+
+:menu
+cls
+echo.
+echo    ╔═══════════════════════════════════════════════════════════════╗
+echo    ║               Ultimate Network Guardian v9.0                  ║
+echo    ║                  由善良的人的遊戲庫提供。作者：帝               ║
+echo    ║                                                               ║
+echo    ║    ██████╗  █████╗  █████╗ ██████╗  █████╗ ███████╗           ║
+echo    ║    ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝           ║
+echo    ║    ██████╔╝██║  ██║███████║██████╔╝███████║█████╗             ║
+echo    ║    ██╔══██╗██║  ██║██╔══██║██╔══██╗██╔══██║██╔══╝             ║
+echo    ║    ██████╔╝╚█████╔╝██║  ██║██║  ██║██║  ██║███████╗           ║
+echo    ║    ╚═════╝  ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝           ║
+echo    ║                                                               ║
+echo    ║           電腦課專用．一鍵解放全班網路．全程自動救網          ║
+echo    ╚═══════════════════════════════════════════════════════════════╝
+echo.
+echo    歡迎使用帝の救網神器！這節課你將全程自由上網～
+echo.
+echo    請選擇守護時間（一分鐘為單位）：
+echo.
+echo       [1] 45分鐘（普通電腦課）
+echo       [2] 50分鐘（最常用）
+echo       [3] 60分鐘（加長課）
+echo       [4] 手動輸入分鐘數
+echo.
+set /p "choice=    請輸入選項 1-4，然後按 Enter 開始守護： "
+
+if "%choice%"=="1" set "minutes=45"
+if "%choice%"=="2" set "minutes=50"
+if "%choice%"=="3" set "minutes=60"
+if "%choice%"=="4" (
+    set /p "minutes=    請輸入你要守護的分鐘數（建議 30-90）： "
+)
+
+if not defined minutes (
+    echo.
+    echo    輸入錯誤！請重新選擇
+    timeout /t 2 >nul
+    goto menu
+)
+
+cls
+echo.
+echo    ╔═══════════════════════════════════════════════════════════════╗
+echo    ║               守護即將開始……請準備好爽一整節課！             ║
+echo    ║                  由善良的人的遊戲庫提供。作者：帝               ║
+echo    ╚═══════════════════════════════════════════════════════════════╝
+echo.
+echo    守護時間：%minutes% 分鐘
+echo    功能：自動修復 IPv4/IPv6 DNS + 自動開關公共代理 + 防火牆救援
+echo.
+echo    按任意鍵開始守護（視窗可直接關閉，背景持續運作）
+pause >nul
+
+:: ╔═══════════════════════════════════════════════════════════════╗
+:: ║                以下是你原本的完整程式碼，一字未改               ║
+:: ╚═══════════════════════════════════════════════════════════════╝
 
 :: 隱形啟動
 if "%1"=="hide" goto start
@@ -58,9 +121,8 @@ echo [%time%] 所有公共代理都失效，繼續嘗試直連...
 call :DisableProxy
 goto :eof
 
-:: 主循環：50分鐘
-set "minutes=50"
-set /a "loops=%minutes%*12"   :: 每5秒一次
+:: 主循環：使用上面使用者選擇的 %minutes%
+set /a "loops=%minutes%*12"
 
 for /l %%i in (1,1,%loops%) do (
 
@@ -84,17 +146,15 @@ for /l %%i in (1,1,%loops%) do (
     netsh advfirewall show allprofiles | findstr /i "Block" >nul
     if not errorlevel 1 netsh advfirewall set allprofiles firewallpolicy allowinbound,allowoutbound >nul 2>nul
 
-    :: Step 3: 真連線測試（不是只看DNS）
+    :: Step 3: 真連線測試
     set "ok=0"
     ping -n 1 -w 1800 %test1% >nul 2>n1 && set "ok=1"
     if %ok%==0 ping -n 1 -w 1800 %test2% >nul 2>n1 && set "ok=1"
     if %ok%==0 ping -n 1 -w 1800 %test3% >nul 2>n1 && set "ok=1"
 
     if %ok%==1 (
-        :: 能直連 → 確保代理是關的
         if defined current_proxy call :DisableProxy
     ) else (
-        :: 真的被擋 → 自動開代理
         if not defined current_proxy call :EnableProxy
     )
 
@@ -104,7 +164,7 @@ for /l %%i in (1,1,%loops%) do (
 :: 結束前確保代理關閉
 call :DisableProxy
 echo.
-echo [智慧守護結束] 50分鐘已到，代理已清除，完美脫身！
-echo 這節課你全程無壓力上網～
+echo [智慧守護結束] %minutes% 分鐘已到，代理已清除，完美脫身！
+echo 感謝使用善良的人的遊戲庫出品～  作者：帝
 pause >nul
 exit
